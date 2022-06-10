@@ -19,7 +19,8 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
      texlive-xetex texlive-fonts-recommended texlive-plain-generic \
      xorg xvfb gtk2-engines-pixbuf \
      dbus-x11 xfonts-base xfonts-100dpi xfonts-75dpi xfonts-cyrillic xfonts-scalable \
-     libnss3-dev libxss1 libcups2 libasound2 libpangocairo-1.0-0 libatk1.0-0 libatk-bridge2.0-0 libgtk-3-0
+     libnss3-dev libxss1 libcups2 libasound2 libpangocairo-1.0-0 libatk1.0-0 libatk-bridge2.0-0 libgtk-3-0 \
+     nodejs npm
 
    
 RUN mkdir -p /home/vscode/.jupyter
@@ -27,6 +28,8 @@ COPY .devcontainer/jupyter_nbconvert_config.py /home/vscode/.jupyter/jupyter_nbc
 RUN chown -R vscode:vscode /home/vscode/.jupyter
 
 RUN pip install pycse nbconvert nbconvert[webpdf] \
+    plotly \
+    && jupyter labextension install plotlywidget \
     && pyppeteer-install \
     # this installs in root, and we need to move this to vscode
     && mv /root/.local /home/vscode/ \
