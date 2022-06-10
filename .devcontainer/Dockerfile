@@ -1,0 +1,53 @@
+# See here for image contents: https://github.com/microsoft/vscode-dev-containers/tree/v0.236.0/containers/python-3-anaconda/.devcontainer/base.Dockerfile
+
+FROM mcr.microsoft.com/vscode/devcontainers/anaconda:0-3
+
+# [Choice] Node.js version: none, lts/*, 16, 14, 12, 10
+ARG NODE_VERSION="none"
+RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"; fi
+
+# Copy environment.yml (if found) to a temp location so we update the environment. Also
+# copy "noop.txt" so the COPY instruction does not fail if no environment.yml exists.
+COPY environment.yml* .devcontainer/noop.txt /tmp/conda-tmp/
+RUN if [ -f "/tmp/conda-tmp/environment.yml" ]; then umask 0002 && /opt/conda/bin/conda env update -n base -f /tmp/conda-tmp/environment.yml; fi \
+    && rm -rf /tmp/conda-tmp
+
+# [Optional] Uncomment this section to install additional OS packages.
+# These packages are to get PDF export via LaTeX and via webpdf
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+     && apt-get -y install --no-install-recommends pandoc \
+     texlive-xetex texlive-fonts-recommended texlive-plain-generic \
+     xorg xvfb gtk2-engines-pixbuf \
+     dbus-x11 xfonts-base xfonts-100dpi xfonts-75dpi xfonts-cyrillic xfonts-scalable \
+     libnss3-dev libxss1 libcups2 libasound2 libpangocairo-1.0-0 libatk1.0-0 libatk-bridge2.0-0 libgtk-3-0
+
+   
+RUN mkdir -p /home/vscode/.jupyter
+COPY .devcontainer/jupyter_nbconvert_config.py /home/vscode/.jupyter/jupyter_nbconvert_config.py
+RUN chown -R vscode:vscode /home/vscode/.jupyter
+
+RUN pip install pycse nbconvert nbconvert[webpdf] \
+    && pyppeteer-install \
+    # this installs in root, and we need to move this to vscode
+    && mv /root/.local /home/vscode/ \
+    && mv /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome-exe \
+    && chown -R vscode:vscode /home/vscode/.local
+
+COPY .devcontainer/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/
+
+# set-up and install yarn / Node.js for jupyter lab extensions
+# Adapted from https://github.com/codespaces-examples/node/blob/main/.devcontainer/setup.sh
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
+    && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
+    && apt-get update && apt-get install yarn -y \
+    # install nvm
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+
+# RUN pip install --upgrade jupyterlab jupyterlab-git
+
+ENV SHELL=/bin/bash
+
+RUN git clone https://github.com/jkitchin/f21-06623.git && cd f21-06623 && pip install .
+
+ENV DISPLAY=:99
+ENTRYPOINT ["sudo Xvfb -ac :99 -screen 0 1280x1024x16 &"]
