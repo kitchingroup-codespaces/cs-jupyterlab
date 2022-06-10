@@ -13,7 +13,7 @@ RUN if [ -f "/tmp/conda-tmp/environment.yml" ]; then umask 0002 && /opt/conda/bi
     && rm -rf /tmp/conda-tmp
 
 # [Optional] Uncomment this section to install additional OS packages.
-# These packages are to get PDF export via LaTeX and via webpdf
+# These packages are to get PDF export via LaTeX (minimal) and via webpdf
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
      && apt-get -y install --no-install-recommends pandoc \
      texlive-xetex texlive-fonts-recommended texlive-plain-generic \
