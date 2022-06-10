@@ -22,7 +22,6 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
      libnss3-dev libxss1 libcups2 libasound2 libpangocairo-1.0-0 libatk1.0-0 libatk-bridge2.0-0 libgtk-3-0 \
      nodejs npm
 
-   
 RUN mkdir -p /home/vscode/.jupyter
 COPY .devcontainer/jupyter_nbconvert_config.py /home/vscode/.jupyter/jupyter_nbconvert_config.py
 RUN chown -R vscode:vscode /home/vscode/.jupyter
@@ -31,26 +30,19 @@ RUN pip install pycse nbconvert nbconvert[webpdf] \
     plotly \
     && jupyter labextension install plotlywidget \
     && pyppeteer-install \
-    # this installs in root, and we need to move this to vscode
+    # this installs in root, and we need to move this to be owned by the vscode user
     && mv /root/.local /home/vscode/ \
     && mv /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome-exe \
     && chown -R vscode:vscode /home/vscode/.local
 
 COPY .devcontainer/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/
 
-# set-up and install yarn / Node.js for jupyter lab extensions
-# Adapted from https://github.com/codespaces-examples/node/blob/main/.devcontainer/setup.sh
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
-    && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
-    && apt-get update && apt-get install yarn -y \
-    # install nvm
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
-
-# RUN pip install --upgrade jupyterlab jupyterlab-git
-
+# This makes the jupyter lab terminal be a bash shell, with completion and color 
 ENV SHELL=/bin/bash
 
+# This installs my class customization for MC questions. you do not need it in general
 RUN git clone https://github.com/jkitchin/f21-06623.git && cd f21-06623 && pip install .
 
+# I don't remember why this seemed important, it does let you see matplotlib figures from vs code though.
 ENV DISPLAY=:99
 ENTRYPOINT ["sudo Xvfb -ac :99 -screen 0 1280x1024x16 &"]
