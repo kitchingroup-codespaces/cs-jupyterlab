@@ -43,6 +43,9 @@ ENV SHELL=/bin/bash
 # This installs my class customization for MC questions. you do not need it in general
 RUN git clone https://github.com/jkitchin/f21-06623.git && cd f21-06623 && pip install .
 
+# Extensions
+RUN pip install jupyterlab-git
+
 # I don't remember why this seemed important, it does let you see matplotlib figures from vs code though.
 ENV DISPLAY=:99
 ENTRYPOINT ["sudo Xvfb -ac :99 -screen 0 1280x1024x16 &"]
