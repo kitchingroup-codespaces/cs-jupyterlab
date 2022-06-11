@@ -22,6 +22,16 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
      libnss3-dev libxss1 libcups2 libasound2 libpangocairo-1.0-0 libatk1.0-0 libatk-bridge2.0-0 libgtk-3-0 \
      nodejs npm
 
+# Julia
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+     && apt-get -y install --no-install-recommends julia \
+     && julia -e "using Pkg; Pkg.add(\"IJulia\")"
+
+# R
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+     && apt-get -y install --no-install-recommends r-base \
+     && Rscript -e "install.packages('IRkernel'); IRkernel::installspec(user = FALSE)"
+
 RUN mkdir -p /home/vscode/.jupyter
 COPY .devcontainer/jupyter_nbconvert_config.py /home/vscode/.jupyter/jupyter_nbconvert_config.py
 RUN chown -R vscode:vscode /home/vscode/.jupyter
@@ -45,7 +55,3 @@ RUN git clone https://github.com/jkitchin/f21-06623.git && cd f21-06623 && pip i
 
 # Extensions
 RUN pip install jupyterlab-git
-
-# I don't remember why this seemed important, it does let you see matplotlib figures from vs code though.
-ENV DISPLAY=:99
-ENTRYPOINT ["sudo Xvfb -ac :99 -screen 0 1280x1024x16 &"]
