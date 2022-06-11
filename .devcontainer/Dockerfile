@@ -23,38 +23,41 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
      nodejs npm
 
 # Julia
-# The kernel is only installed for the user who runs the command
-# This is done as root, so we try moving and chowning the files
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-     && apt-get -y install --no-install-recommends julia \
-     && julia -e "using Pkg; Pkg.add(\"IJulia\")" \
-     && mv /root/.julia /home/vscode/.julia \
-     && chown -R vscode:vscode /home/vscode/.julia
+     && apt-get -y install --no-install-recommends julia 
 
 # R
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-     && apt-get -y install --no-install-recommends r-base \
-     && Rscript -e "install.packages('IRkernel'); IRkernel::installspec(user = FALSE)"
+     && apt-get -y install --no-install-recommends r-base 
 
 RUN mkdir -p /home/vscode/.jupyter
 COPY .devcontainer/jupyter_nbconvert_config.py /home/vscode/.jupyter/jupyter_nbconvert_config.py
 RUN chown -R vscode:vscode /home/vscode/.jupyter
-
-RUN pip install pycse nbconvert nbconvert[webpdf] \
-    plotly \
-    && jupyter labextension install plotlywidget \
-    && pyppeteer-install \
-    # this installs in root, and we need to move this to be owned by the vscode user
-    && mv /root/.local /home/vscode/ \
-    && mv /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome-exe \
-    && chown -R vscode:vscode /home/vscode/.local
 
 COPY .devcontainer/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/
 
 # This makes the jupyter lab terminal be a bash shell, with completion and color 
 ENV SHELL=/bin/bash
 
-# This installs my class customization for MC questions. you do not need it in general
+USER vscode
+RUN julia -e "using Pkg; Pkg.add(\"IJulia\"); Pkg.build(\"IJulia\")"
+RUN Rscript -e "install.packages('IRkernel'); IRkernel::installspec()"
+
+RUN python -m venv /home/vscode/venv && /home/vscode/venv/activate
+
+RUN python -m pip install pycse nbconvert nbconvert[webpdf] \
+    plotly \
+    pytest \
+    black flake8 jupyterlab_flake8  \
+    pint quantities lmfit \
+    && jupyter labextension install plotlywidget \
+    && jupyter nbextension install https://github.com/drillan/jupyter-black/archive/master.zip --user \
+    && jupyter nbextension enable jupyter-black-master/jupyter-black \
+    && pyppeteer-install \
+    && mv /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome-exe \
+    
+
+# This installs my class customization for MC questions. you do not need it in general, it is a proof of concept here
 RUN git clone https://github.com/jkitchin/f21-06623.git && cd f21-06623 && pip install .
 
 # Extensions
