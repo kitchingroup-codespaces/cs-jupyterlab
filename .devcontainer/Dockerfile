@@ -23,9 +23,13 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
      nodejs npm
 
 # Julia
+# The kernel is only installed for the user who runs the command
+# This is done as root, so we try moving and chowning the files
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
      && apt-get -y install --no-install-recommends julia \
-     && julia -e "using Pkg; Pkg.add(\"IJulia\")"
+     && julia -e "using Pkg; Pkg.add(\"IJulia\")" \
+     && mv /root/.julia /home/vscode/.julia \
+     && chown -R vscode:vscode /home/vscode/.julia
 
 # R
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
