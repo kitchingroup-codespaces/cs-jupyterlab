@@ -1,5 +1,6 @@
 #+title: Jupyterlab in Codespaces
 
+This has a lot of batteries included.
 
 * Python
 

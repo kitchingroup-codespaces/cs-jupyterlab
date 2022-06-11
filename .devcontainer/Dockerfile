@@ -20,7 +20,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
      xorg xvfb gtk2-engines-pixbuf \
      dbus-x11 xfonts-base xfonts-100dpi xfonts-75dpi xfonts-cyrillic xfonts-scalable \
      libnss3-dev libxss1 libcups2 libasound2 libpangocairo-1.0-0 libatk1.0-0 libatk-bridge2.0-0 libgtk-3-0 \
-     nodejs npm
+     nodejs npm libzmq3-dev
 
 # Julia
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
@@ -30,6 +30,10 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
      && apt-get -y install --no-install-recommends r-base  \
      && Rscript -e "install.packages('IRkernel'); IRkernel::installspec(user = FALSE)"
+
+# Racket
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+     && apt-get -y install --no-install-recommends racket
 
 RUN mkdir -p /home/vscode/.jupyter
 COPY .devcontainer/jupyter_nbconvert_config.py /home/vscode/.jupyter/jupyter_nbconvert_config.py
@@ -41,6 +45,9 @@ COPY .devcontainer/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588
 RUN chown -R vscode:vscode /home/vscode
 
 # This makes the jupyter lab terminal be a bash shell, with completion and color 
+# It also makes sure the RUN commands below happen in bash, and not sh
+# That is important for the source commands.
+SHELL ["/bin/bash", "-c"]
 ENV SHELL=/bin/bash
 
 CMD ["source /home/vscode/venv/bin/activate"]
@@ -48,23 +55,24 @@ CMD ["source /home/vscode/venv/bin/activate"]
 # Here I try to setup all this in the vscode userspace
 # this should avoid some warnings about using pip as root
 USER vscode
-RUN julia -e "using Pkg; Pkg.add(\"IJulia\"); Pkg.build(\"IJulia\")"
+RUN julia -e "using Pkg; Pkg.add(\"IJulia\"); Pkg.build(\"IJulia\")"; 
+RUN julia -e "using Pkg; Pkg.add(\"Plots\"); Pkg.build(\"Plots\")"; 
+RUN raco pkg install iracket && raco iracket install
+RUN python -m venv /home/vscode/venv && source /home/vscode/venv/bin/activate
 
-# RUN python -m venv /home/vscode/venv && source /home/vscode/venv/bin/activate
-
-# RUN source /home/vscode/venv/bin/activate \
-#     && /home/vscode/venv/bin/python -m pip install --upgrade pip \
-#     && python -m pip install pycse nbconvert nbconvert[webpdf] \
-#     plotly \
-#     pytest \
-#     black flake8 jupyterlab_flake8  \
-#     pint quantities lmfit \
-#     jupyterlab-git \
-#     && jupyter labextension install plotlywidget \
-#     && jupyter nbextension install https://github.com/drillan/jupyter-black/archive/master.zip --user \
-#     && jupyter nbextension enable jupyter-black-master/jupyter-black \
-#     && pyppeteer-install \
-#     && mv /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome-exe 
-
-# # This installs my class customization for MC questions. you do not need it in general, it is a proof of concept here
-# RUN git clone https://github.com/jkitchin/f21-06623.git && cd f21-06623 && source /home/vscode/venv/activate && python -m pip install .
+RUN source /home/vscode/venv/bin/activate \
+     && python -m pip install --upgrade pip \
+    && python -m pip install pycse nbconvert nbconvert[webpdf] \
+    plotly \
+    pytest \
+    black flake8 pylint jupyterlab_flake8 pycodestyle pycodestyle_magic \
+    pint quantities lmfit pysr \
+    jupyterlab-git \
+    # this is really a proof of concept for building the class package
+    https://github.com/jkitchin/f21-06623/archive/refs/heads/master.zip \
+    && jupyter labextension install plotlywidget \
+    && jupyter nbextension install https://github.com/drillan/jupyter-black/archive/master.zip --user \
+    && jupyter nbextension enable jupyter-black-master/jupyter-black \
+    && pyppeteer-install \
+    && mv /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome-exe 
+    
