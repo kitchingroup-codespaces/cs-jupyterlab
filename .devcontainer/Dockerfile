@@ -33,7 +33,9 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 
 # Racket
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-     && apt-get -y install --no-install-recommends racket
+     && apt-get -y install --no-install-recommends racket \
+     # this seems to work, but reports errors which kills the build, so I use || true to fix that
+     && raco pkg install --batch --deps search-auto iracket || true && raco iracket install || true
 
 RUN mkdir -p /home/vscode/.jupyter
 COPY .devcontainer/jupyter_nbconvert_config.py /home/vscode/.jupyter/jupyter_nbconvert_config.py
@@ -57,7 +59,7 @@ CMD ["source /home/vscode/venv/bin/activate"]
 USER vscode
 RUN julia -e "using Pkg; Pkg.add(\"IJulia\"); Pkg.build(\"IJulia\")"; 
 RUN julia -e "using Pkg; Pkg.add(\"Plots\"); Pkg.build(\"Plots\")"; 
-RUN raco pkg install iracket && raco iracket install
+
 RUN python -m venv /home/vscode/venv && source /home/vscode/venv/bin/activate
 
 RUN source /home/vscode/venv/bin/activate \
@@ -73,6 +75,7 @@ RUN source /home/vscode/venv/bin/activate \
     && jupyter labextension install plotlywidget \
     && jupyter nbextension install https://github.com/drillan/jupyter-black/archive/master.zip --user \
     && jupyter nbextension enable jupyter-black-master/jupyter-black \
+    && conda install -c conda-forge pyomo ipopt glpk \
     && pyppeteer-install \
     && mv /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome-exe 
     
