@@ -1,9 +1,23 @@
 #+title: Jupyterlab in Codespaces
 
-This has a lot of batteries included.
+This has a lot of batteries included. I include kernels for Python, Julia, R and Racket. I guess you would not want all of these in a typical project. This repo illustrates what is possible.
+
+I have not thoroughly tested all of these.
 
 * Python
 
+The Python kernel supports a lot of packages. It is based off of Anaconda which already provides a lot of features, and I have added quite a few more on top of that. 
+
+I have made it possible to export your notebooks to PDF via LaTeX and via webpdf.
+
 * Julia
 
+This is a pretty minimal Julia environment. It inlcudes Plots 
+
 * R
+
+I include a very minimal R environment. It is mostly a demonstration that you can run R in a Codespace.
+
+* Racket
+
+I include a minimal Racket environment as a demonstration of running Racket in a Codespace.
