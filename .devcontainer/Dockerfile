@@ -26,11 +26,13 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
      xorg xvfb gtk2-engines-pixbuf \
      dbus-x11 xfonts-base xfonts-100dpi xfonts-75dpi xfonts-cyrillic xfonts-scalable \
      libnss3-dev libxss1 libcups2 libasound2 libpangocairo-1.0-0 libatk1.0-0 libatk-bridge2.0-0 libgtk-3-0 \
-     nodejs npm libzmq3-dev
+     nodejs npm libzmq3-dev libsundials-dev
 
 # Julia
+COPY .devcontainer/julia-setup.jl julia-setup.jl
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-     && apt-get -y install --no-install-recommends julia 
+     && apt-get -y install --no-install-recommends julia \
+     && julia julia-setup.jl
 
 # R
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
@@ -46,7 +48,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 RUN mkdir -p /home/vscode/.jupyter
 COPY .devcontainer/jupyter_nbconvert_config.py /home/vscode/.jupyter/jupyter_nbconvert_config.py
 
-COPY .devcontainer/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/
+
 
 # Note: this results in some warnings during build about not running pip as root
 # with a suggestion to use a venv. I tried a lot of variations, and was unsuccessful
@@ -64,9 +66,7 @@ RUN python -m pip install --upgrade pip \
     && jupyter labextension install plotlywidget \
     && jupyter nbextension install https://github.com/drillan/jupyter-black/archive/master.zip --user \
     && jupyter nbextension enable jupyter-black-master/jupyter-black \
-    && conda install -c conda-forge pyomo ipopt glpk \
-    && pyppeteer-install \
-    && mv /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome-exe 
+    && conda install -c conda-forge pyomo ipopt glpk 
     
 # Make sure everything in vscode belongs to vscode
 RUN chown -R vscode:vscode /home/vscode
@@ -78,4 +78,10 @@ RUN julia -e "using Pkg; Pkg.add(\"IJulia\"); Pkg.build(\"IJulia\")"
 RUN julia -e "using Pkg; Pkg.add(\"Plots\"); Pkg.build(\"Plots\")" 
 RUN raco pkg install --batch --deps search-auto iracket || true && raco iracket install || true
 
+# setup for chromium so that webpdf works
+# I had to monkey-patch the chrome executable with a shell script that uses --no-sandbox in .devcontainer/chrome
+# to get the menu in jupyter lab to work
+RUN pyppeteer-install \
+    && mv /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome-exe 
+COPY .devcontainer/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/
 
