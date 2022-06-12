@@ -40,14 +40,18 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 # Racket
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
      && apt-get -y install --no-install-recommends racket racket-doc
-
-     
+   
 # Hack for controlling how chromium works with no-sandbox and allow-downloads
+# This seems to be important mostly for using webpdf in nbconvert.
 RUN mkdir -p /home/vscode/.jupyter
 COPY .devcontainer/jupyter_nbconvert_config.py /home/vscode/.jupyter/jupyter_nbconvert_config.py
 
 COPY .devcontainer/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/
 
+# Note: this results in some warnings during build about not running pip as root
+# with a suggestion to use a venv. I tried a lot of variations, and was unsuccessful
+# in getting everything to work where the venv was activated in the Codespace, and
+# that Jupyter Lab used the venv. This works fine as far as I can tell.
 RUN python -m pip install --upgrade pip \
     && python -m pip install pycse nbconvert nbconvert[webpdf] \
     plotly \
@@ -68,7 +72,7 @@ RUN python -m pip install --upgrade pip \
 RUN chown -R vscode:vscode /home/vscode
 
 # Here I try to setup all this in the vscode userspace
-# this should avoid some warnings about using pip as root
+# It appears these need to be run as the user.
 USER vscode
 RUN julia -e "using Pkg; Pkg.add(\"IJulia\"); Pkg.build(\"IJulia\")" 
 RUN julia -e "using Pkg; Pkg.add(\"Plots\"); Pkg.build(\"Plots\")" 
