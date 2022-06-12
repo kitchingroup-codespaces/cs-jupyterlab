@@ -29,10 +29,8 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
      nodejs npm libzmq3-dev libsundials-dev
 
 # Julia
-COPY .devcontainer/julia-setup.jl julia-setup.jl
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-     && apt-get -y install --no-install-recommends julia \
-     && julia julia-setup.jl
+     && apt-get -y install --no-install-recommends julia 
 
 # R
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
@@ -61,6 +59,7 @@ RUN python -m pip install --upgrade pip \
     black flake8 pylint jupyterlab_flake8 pycodestyle pycodestyle_magic \
     pint quantities lmfit pysr \
     jupyterlab-git \
+    jax[cpu]\
     # this is really a proof of concept for building the class package
     https://github.com/jkitchin/f21-06623/archive/refs/heads/master.zip \
     && jupyter labextension install plotlywidget \
@@ -74,8 +73,9 @@ RUN chown -R vscode:vscode /home/vscode
 # Here I try to setup all this in the vscode userspace
 # It appears these need to be run as the user.
 USER vscode
-RUN julia -e "using Pkg; Pkg.add(\"IJulia\"); Pkg.build(\"IJulia\")" 
-RUN julia -e "using Pkg; Pkg.add(\"Plots\"); Pkg.build(\"Plots\")" 
+COPY .devcontainer/julia-setup.jl julia-setup.jl
+RUN julia julia-setup.jl
+
 RUN raco pkg install --batch --deps search-auto iracket || true && raco iracket install || true
 
 # setup for chromium so that webpdf works
