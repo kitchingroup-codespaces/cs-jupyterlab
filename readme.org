@@ -1,5 +1,7 @@
 #+title: Jupyterlab in Codespaces
 
+[[./jupyter-in-the-cloud.png]]
+
 This has a lot of batteries included. I include kernels for Python, Julia, R and Racket. I guess you would not want all of these in a typical project. This repo illustrates what is possible.
 
 I have not thoroughly tested all of these.
@@ -12,7 +14,7 @@ I have made it possible to export your notebooks to PDF via LaTeX and via webpdf
 
 * Julia
 
-This is a pretty minimal Julia environment. It inlcudes Plots 
+This is a pretty minimal Julia environment. It includes Plots and ForwardDiff.
 
 * R
 
