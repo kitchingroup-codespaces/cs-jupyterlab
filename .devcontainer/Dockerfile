@@ -46,8 +46,6 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 RUN mkdir -p /home/vscode/.jupyter
 COPY .devcontainer/jupyter_nbconvert_config.py /home/vscode/.jupyter/jupyter_nbconvert_config.py
 
-
-
 # Note: this results in some warnings during build about not running pip as root
 # with a suggestion to use a venv. I tried a lot of variations, and was unsuccessful
 # in getting everything to work where the venv was activated in the Codespace, and
@@ -56,16 +54,15 @@ RUN python -m pip install --upgrade pip \
     && python -m pip install pycse nbconvert nbconvert[webpdf] nbmake nbdime \
     plotly \
     pytest \
-    black flake8 pylint isort jupyterlab_flake8 pycodestyle pycodestyle_magic \
-    pint quantities lmfit pysr pyDOE2 \
-    jupyterlab-git \
-    jax[cpu]\
+    black flake8 pylint isort pycodestyle pycodestyle_magic \
+    pint quantities lmfit pysr pyDOE2 \ 
+    jax[cpu] \
     # this is really a proof of concept for building the class package
     https://github.com/jkitchin/f21-06623/archive/refs/heads/master.zip \
-    && jupyter labextension install plotlywidget \
     && conda install -c conda-forge pyomo ipopt glpk \
+    && jupyter labextension install plotlywidget \
     # I pipe this to true to avoid some reported issues
-    && pip install jupyterlab-link-share || true 
+    && pip install jupyterlab_flake8 jupyterlab-git jupyterlab-link-share || true 
     
 # Make sure everything in vscode belongs to vscode
 RUN chown -R vscode:vscode /home/vscode
