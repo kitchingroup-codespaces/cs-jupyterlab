@@ -26,7 +26,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
      xorg xvfb gtk2-engines-pixbuf \
      dbus-x11 xfonts-base xfonts-100dpi xfonts-75dpi xfonts-cyrillic xfonts-scalable \
      libnss3-dev libxss1 libcups2 libasound2 libpangocairo-1.0-0 libatk1.0-0 libatk-bridge2.0-0 libgtk-3-0 \
-     nodejs npm libzmq3-dev libsundials-dev
+     nodejs npm libzmq3-dev libsundials-dev tree
 
 # Julia
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
@@ -53,19 +53,19 @@ COPY .devcontainer/jupyter_nbconvert_config.py /home/vscode/.jupyter/jupyter_nbc
 # in getting everything to work where the venv was activated in the Codespace, and
 # that Jupyter Lab used the venv. This works fine as far as I can tell.
 RUN python -m pip install --upgrade pip \
-    && python -m pip install pycse nbconvert nbconvert[webpdf] \
+    && python -m pip install pycse nbconvert nbconvert[webpdf] nbmake nbdime \
     plotly \
     pytest \
-    black flake8 pylint jupyterlab_flake8 pycodestyle pycodestyle_magic \
-    pint quantities lmfit pysr \
+    black flake8 pylint isort jupyterlab_flake8 pycodestyle pycodestyle_magic \
+    pint quantities lmfit pysr pyDOE2 \
     jupyterlab-git \
     jax[cpu]\
     # this is really a proof of concept for building the class package
     https://github.com/jkitchin/f21-06623/archive/refs/heads/master.zip \
     && jupyter labextension install plotlywidget \
-    && jupyter nbextension install https://github.com/drillan/jupyter-black/archive/master.zip --user \
-    && jupyter nbextension enable jupyter-black-master/jupyter-black \
-    && conda install -c conda-forge pyomo ipopt glpk 
+    && conda install -c conda-forge pyomo ipopt glpk \
+    # I pipe this to true to avoid some reported issues
+    && pip install jupyterlab-link-share || true 
     
 # Make sure everything in vscode belongs to vscode
 RUN chown -R vscode:vscode /home/vscode
@@ -84,4 +84,7 @@ RUN raco pkg install --batch --deps search-auto iracket || true && raco iracket 
 RUN pyppeteer-install \
     && mv /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome-exe 
 COPY .devcontainer/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/
+
+# the jupyter-link-share breaks jupyter lab unless you disable this.
+RUN jupyter server extension disable nbclassic 
 
