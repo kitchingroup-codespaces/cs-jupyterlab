@@ -33,7 +33,9 @@ RUN python -m pip install --upgrade pip \
     plotly \
     jax[cpu] \
     jupyterlab-link-share \
-    && jupyter labextension install plotlywidget
+    && jupyter labextension install plotlywidget \
+    # the jupyter-link-share breaks jupyter lab unless you disable this.
+    && jupyter server extension disable nbclassic 
 
 # Julia
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
@@ -44,24 +46,27 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
      && apt-get -y install --no-install-recommends r-base  \
      && Rscript -e "install.packages('IRkernel'); IRkernel::installspec(user = FALSE)"
 
-# Racket
+# # Racket
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-     && apt-get -y install --no-install-recommends racket racket-doc      
+    && apt-get -y install --no-install-recommends racket racket-doc      
 
-SHELL ["/bin/bash", "-c"]
-ENV SHELL=/bin/bash
+
+# Up to this point the build succeeds. Past it, the build fails with something like
+# #21 exporting to image
+# #21 sha256:e8c613e07b0b7ff33893b694f7759a10d42e180f2b4dc349fb57dc6b71dcab00
+# #21 exporting layers
+# unexpected EOF
+
 
 ######## USER code ##############
 
-USER vscode
-COPY .devcontainer/julia-setup.jl julia-setup.jl
-RUN julia julia-setup.jl
+# USER vscode
+# COPY .devcontainer/julia-setup.jl julia-setup.jl
+# RUN julia julia-setup.jl
 
-RUN raco pkg install --batch --deps search-auto iracket && raco iracket install
+# RUN raco pkg install --batch --deps search-auto iracket && raco iracket install
 
-RUN pyppeteer-install \
-    && mv /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome-exe 
-COPY .devcontainer/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/
+# RUN pyppeteer-install \
+#     && mv /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome-exe 
+# COPY .devcontainer/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/
 
-# # the jupyter-link-share breaks jupyter lab unless you disable this.
-RUN jupyter server extension disable nbclassic 
