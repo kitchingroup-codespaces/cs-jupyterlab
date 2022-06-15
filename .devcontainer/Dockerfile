@@ -60,13 +60,13 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 
 ######## USER code ##############
 
-# USER vscode
-# COPY .devcontainer/julia-setup.jl julia-setup.jl
-# RUN julia julia-setup.jl
+USER vscode
+COPY .devcontainer/julia-setup.jl julia-setup.jl
+RUN julia julia-setup.jl
 
-# RUN raco pkg install --batch --deps search-auto iracket && raco iracket install
+RUN raco pkg install --batch --deps search-auto iracket && raco iracket install
 
-# RUN pyppeteer-install \
-#     && mv /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome-exe 
-# COPY .devcontainer/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/
+RUN pyppeteer-install \
+    && mv /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome-exe 
+COPY .devcontainer/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/
 
