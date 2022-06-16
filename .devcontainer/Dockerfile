@@ -2,12 +2,6 @@
 
 FROM mcr.microsoft.com/vscode/devcontainers/anaconda:0-3
 
-# This makes the jupyter lab terminal be a bash shell, with completion and color 
-# It also makes sure the RUN commands below happen in bash, and not sh
-# That is important for the source commands.
-SHELL ["/bin/bash", "-c"]
-ENV SHELL=/bin/bash
-
 # [Choice] Node.js version: none, lts/*, 16, 14, 12, 10
 ARG NODE_VERSION="none"
 RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"; fi
@@ -45,7 +39,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 # Hack for controlling how chromium works with no-sandbox and allow-downloads
 RUN mkdir -p /home/vscode/.jupyter
 COPY .devcontainer/jupyter_nbconvert_config.py /home/vscode/.jupyter/jupyter_nbconvert_config.py
-
+COPY .devcontainer/jupyter_lab_config.py /home/vscode/.jupyter/jupyter_lab_config.py
 COPY .devcontainer/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/
 
 RUN python -m pip install --upgrade pip \
@@ -57,12 +51,7 @@ RUN python -m pip install --upgrade pip \
     jupyterlab-git \
     # this is really a proof of concept for building the class package
     https://github.com/jkitchin/f21-06623/archive/refs/heads/master.zip \
-    && jupyter labextension install plotlywidget \
-    && jupyter nbextension install https://github.com/drillan/jupyter-black/archive/master.zip --user \
-    && jupyter nbextension enable jupyter-black-master/jupyter-black \
-    && conda install -c conda-forge pyomo ipopt glpk \
-    && pyppeteer-install \
-    && mv /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome-exe 
+    && jupyter labextension install plotlywidget 
     
 # Make sure everything in vscode belongs to vscode
 RUN chown -R vscode:vscode /home/vscode
@@ -73,5 +62,6 @@ USER vscode
 RUN julia -e "using Pkg; Pkg.add(\"IJulia\"); Pkg.build(\"IJulia\")" 
 RUN julia -e "using Pkg; Pkg.add(\"Plots\"); Pkg.build(\"Plots\")" 
 RUN raco pkg install --batch --deps search-auto iracket || true && raco iracket install || true
-
+RUN pyppeteer-install \
+    && mv /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome-exe 
 
