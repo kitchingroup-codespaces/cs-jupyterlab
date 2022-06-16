@@ -1,0 +1,17 @@
+{
+    "VideoChat": {
+      "room_prefix": "cs-jupyterlab",
+      "rooms": [
+        {
+          "id": "office-hours",
+          "displayName": "Office hours",
+          "description": "Daily room for office hours"
+        },
+        {
+          "id": "recitation",
+          "displayName": "Recitation",
+          "description": "A weekly room for the recitation session"
+        }
+      ]
+    }
+  }

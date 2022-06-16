@@ -40,6 +40,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 RUN mkdir -p /home/vscode/.jupyter
 COPY .devcontainer/jupyter_nbconvert_config.py /home/vscode/.jupyter/jupyter_nbconvert_config.py
 COPY .devcontainer/jupyter_lab_config.py /home/vscode/.jupyter/jupyter_lab_config.py
+COPY .devcontainer/jupyter_server_config.json /home/vscode/.jupyter/jupyter_server_config.json
 
 RUN python -m pip install --upgrade pip \
     && python -m pip install pycse nbconvert nbconvert[webpdf] \
