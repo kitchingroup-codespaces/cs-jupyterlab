@@ -54,6 +54,8 @@ RUN python -m pip install --upgrade pip \
 # Make sure everything in vscode belongs to vscode
 RUN chown -R vscode:vscode /home/vscode
 
+ENV SHELL=/bin/bash
+
 # Here I try to setup all this in the vscode userspace
 # this should avoid some warnings about using pip as root
 USER vscode
