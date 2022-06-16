@@ -40,17 +40,14 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 RUN mkdir -p /home/vscode/.jupyter
 COPY .devcontainer/jupyter_nbconvert_config.py /home/vscode/.jupyter/jupyter_nbconvert_config.py
 COPY .devcontainer/jupyter_lab_config.py /home/vscode/.jupyter/jupyter_lab_config.py
-COPY .devcontainer/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/
 
 RUN python -m pip install --upgrade pip \
     && python -m pip install pycse nbconvert nbconvert[webpdf] \
     plotly \
     pytest \
-    black flake8 pylint jupyterlab_flake8 pycodestyle pycodestyle_magic \
-    pint quantities lmfit pysr \
+    black flake8 pylint \
+    pycse pint quantities lmfit pysr jax[cpu] \
     jupyterlab-git \
-    # this is really a proof of concept for building the class package
-    https://github.com/jkitchin/f21-06623/archive/refs/heads/master.zip \
     && jupyter labextension install plotlywidget 
     
 # Make sure everything in vscode belongs to vscode
@@ -65,3 +62,7 @@ RUN raco pkg install --batch --deps search-auto iracket || true && raco iracket 
 RUN pyppeteer-install \
     && mv /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome-exe 
 
+COPY .devcontainer/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome
+
+RUN pip install jupyterlab-link-share || true \
+    && jupyter server extension disable nbclassic  
