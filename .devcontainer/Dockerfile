@@ -46,8 +46,9 @@ RUN python -m pip install --upgrade pip \
     plotly \
     pytest \
     black flake8 pylint \
-    pycse pint quantities lmfit pysr jax[cpu] \
-    jupyterlab-git \
+    pycse pint quantities pyDOE2\
+    lmfit pysr jax[cpu] \
+    jupyterlab-git jupyter-videochat \
     && jupyter labextension install plotlywidget 
     
 # Make sure everything in vscode belongs to vscode
@@ -58,11 +59,11 @@ RUN chown -R vscode:vscode /home/vscode
 USER vscode
 RUN julia -e "using Pkg; Pkg.add(\"IJulia\"); Pkg.build(\"IJulia\")" 
 RUN julia -e "using Pkg; Pkg.add(\"Plots\"); Pkg.build(\"Plots\")" 
-RUN raco pkg install --batch --deps search-auto iracket || true && raco iracket install || true
+RUN raco pkg install --batch --deps search-auto iracket && raco iracket install 
 RUN pyppeteer-install \
     && mv /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome-exe 
 
 COPY .devcontainer/chrome /home/vscode/.local/share/pyppeteer/local-chromium/588429/chrome-linux/chrome
 
-RUN pip install jupyterlab-link-share || true \
+RUN pip install jupyterlab-link-share \
     && jupyter server extension disable nbclassic  
