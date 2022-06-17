@@ -12,6 +12,10 @@ The Python kernel supports a lot of packages. It is based off of Anaconda which 
 
 I have made it possible to export your notebooks to PDF via LaTeX and via webpdf.
 
+The Jupyter lab interface is collaborative by default, and the [[https://github.com/jupyterlab-contrib/jupyterlab-link-share]] extension is installed. It is easy to invite people who are in your GitHUB organization and who are members of the repo to do real time collaboration. To invite outside people you need to configure the port it is on to be public.
+
+The [[https://github.com/jupyterlab-contrib/jupyter-videochat]] extension is also installed, so you can open a video chat in your jupyter lab notebook.
+
 * Julia
 
 This is a pretty minimal Julia environment. It includes Plots and ForwardDiff.
