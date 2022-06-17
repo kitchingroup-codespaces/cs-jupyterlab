@@ -369,7 +369,7 @@ print('Reading jupyter_lab_config')
 
 ## Whether to enable collaborative mode.
 #  Default: False
-# c.LabApp.collaborative = False
+c.LabApp.collaborative = True
 
 ## Full path of a config file.
 #  See also: JupyterApp.config_file
