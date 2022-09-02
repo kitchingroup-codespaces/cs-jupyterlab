@@ -20,17 +20,17 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
      xorg xvfb gtk2-engines-pixbuf \
      dbus-x11 xfonts-base xfonts-100dpi xfonts-75dpi xfonts-cyrillic xfonts-scalable \
      libnss3-dev libxss1 libcups2 libasound2 libpangocairo-1.0-0 libatk1.0-0 libatk-bridge2.0-0 libgtk-3-0 \
-     nodejs npm libzmq3-dev
+     nodejs npm libzmq3-dev build-essential
 
 # Julia
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
      && apt-get -y install --no-install-recommends julia 
 
 # R
-RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-     && apt-get -y install --no-install-recommends r-base  \
-     && Rscript -e "install.packages('IRkernel'); IRkernel::installspec(user = FALSE)"
-
+#RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+#    && apt-get -y install --no-install-recommends r-base  \
+#    && Rscript -e "install.packages('IRkernel'); IRkernel::installspec(user = FALSE)"
+    
 # Racket
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
      && apt-get -y install --no-install-recommends racket racket-doc
